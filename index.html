@@ -5,11 +5,16 @@
 .raze-curtain{position:absolute;overflow:hidden;z-index:5;pointer-events:auto;isolation:isolate}.raze-curtain__image{position:absolute;inset:-2%;width:104%;height:104%;object-fit:fill;filter:url(#raze-wind-warp);transform-origin:50% 0;animation:raze-wind 6s ease-in-out infinite;will-change:transform}.raze-curtain::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,#0005,transparent 20%,transparent 80%,#0005)}@keyframes raze-wind{0%,100%{transform:skewX(0deg) translateX(0)}19%{transform:skewX(-.7deg) translateX(-.35%)}43%{transform:skewX(.55deg) translateX(.25%)}67%{transform:skewX(-.3deg) translateX(-.18%)}82%{transform:skewX(.5deg) translateX(.15%)}}@media(prefers-reduced-motion:reduce){.raze-curtain__image{animation:none;filter:none}}
 
 .raze-curtain{border-radius:1.2%;box-shadow:inset 0 0 15px #0008}.raze-curtain__image{pointer-events:none}.scene .raze-curtain__image{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+
+/* Masquage de l'onglet Raze Cards dans la barre supérieure */
+.raze-cards-nav-mask{position:absolute;z-index:4;background:#080808;pointer-events:auto}
+/* Texte de teasing au-dessus du rideau, sans modifier l'animation */
+.raze-curtain__label{position:absolute;z-index:3;left:5%;right:5%;top:49%;transform:translateY(-50%);padding:.6em .2em;text-align:center;font-family:Arial,sans-serif;font-weight:900;font-size:clamp(10px,1.55vw,30px);letter-spacing:.08em;text-transform:uppercase;color:#f7f2ef;text-shadow:0 3px 7px #000,0 0 14px #000,0 0 22px #e51d32;pointer-events:none;white-space:nowrap}
 </style></head><body><main class="scene" id="scene" aria-label="Accueil RAZE ESPORT"><img id="art" width="1672" height="941" src="assets/accueil-raze-esport.png" alt="Accueil RAZE ESPORT, trois univers Championship, Cards et Private Match"></main><section class="screen" id="screen" role="dialog" aria-modal="true" aria-label="Espace interactif"><div class="panel"><div class="top"><h1 id="heading"></h1><button class="close" onclick="hide()">✕ Retour à l'accueil</button></div><div id="content"></div></div></section><script>
 const scene=document.getElementById('scene'),art=document.getElementById('art'),screen=document.getElementById('screen'),heading=document.getElementById('heading'),content=document.getElementById('content');
 // Coordinates expressed as fractions of the exact supplied artwork, not guessed from a replacement layout.
 const spots=[
-['Accueil',.239,.008,.06,.076,'home'],['Raze Championship',.301,.008,.098,.075,'champ'],['Raze Cards',.403,.008,.065,.075,'cards'],['Private Match',.472,.008,.076,.075,'match'],['Communauté',.55,.008,.08,.075,'community'],['Boutique',.626,.008,.064,.075,'shop'],['Recherche',.701,.008,.035,.075,'search'],['Notifications',.74,.008,.038,.075,'notifications'],['Profil',.783,.008,.141,.075,'profile'],['Logo RAZE',.155,.006,.069,.074,'home'],
+['Accueil',.239,.008,.06,.076,'home'],['Raze Championship',.301,.008,.098,.075,'champ'],['Private Match',.472,.008,.076,.075,'match'],['Communauté',.55,.008,.08,.075,'community'],['Boutique',.626,.008,.064,.075,'shop'],['Recherche',.701,.008,.035,.075,'search'],['Notifications',.74,.008,.038,.075,'notifications'],['Profil',.783,.008,.141,.075,'profile'],['Logo RAZE',.155,.006,.069,.074,'home'],
 ['Raze Championship',.095,.307,.264,.468,'champ'],['Raze Cards',.372,.307,.255,.468,'cards'],['Private Match',.64,.307,.265,.468,'match'],
 ['Communauté active',.046,.87,.228,.092,'community'],['Compte unique',.275,.87,.211,.092,'profile'],['Progression globale',.487,.87,.226,.092,'match'],['Récompenses',.716,.87,.245,.092,'champ']];
 function layout(){document.querySelectorAll('.hot').forEach(e=>e.remove());let vw=art.clientWidth,vh=art.clientHeight,ox=art.offsetLeft,oy=art.offsetTop;spots.forEach(([name,x,y,sw,sh,id])=>{let b=document.createElement('button');b.className='hot '+(['champ','cards','match'].includes(id)?'card':'');b.title=name;b.setAttribute('aria-label',name);b.style.cssText=`left:${ox+x*vw}px;top:${oy+y*vh}px;width:${sw*vw}px;height:${sh*vh}px`;b.onclick=()=>show(id);scene.append(b)})}window.addEventListener('resize',layout);art.addEventListener('load',layout);layout();
@@ -33,12 +38,18 @@ function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;',
  curtain.className='raze-curtain';
  curtain.setAttribute('role','img');
  curtain.setAttribute('aria-label','Raze Cards : projet secret à venir');
- curtain.innerHTML=`<svg aria-hidden="true" width="0" height="0" style="position:absolute"><filter id="raze-wind-warp" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.006 0.013" numOctaves="2" seed="7" result="noise"><animate attributeName="baseFrequency" values="0.006 0.013;0.009 0.018;0.005 0.011;0.008 0.016;0.006 0.013" dur="7s" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" in2="noise" scale="12" xChannelSelector="R" yChannelSelector="G"><animate attributeName="scale" values="6;18;10;22;6" dur="7s" repeatCount="indefinite"/></feDisplacementMap></filter></svg><img class="raze-curtain__image" src="assets/rideau.png" alt="">`;
+ curtain.innerHTML=`<svg aria-hidden="true" width="0" height="0" style="position:absolute"><filter id="raze-wind-warp" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.006 0.013" numOctaves="2" seed="7" result="noise"><animate attributeName="baseFrequency" values="0.006 0.013;0.009 0.018;0.005 0.011;0.008 0.016;0.006 0.013" dur="7s" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" in2="noise" scale="12" xChannelSelector="R" yChannelSelector="G"><animate attributeName="scale" values="6;18;10;22;6" dur="7s" repeatCount="indefinite"/></feDisplacementMap></filter></svg><img class="raze-curtain__image" src="assets/rideau.png" alt=""><span class="raze-curtain__label">PROJET EN COURS</span>`;
  scene.appendChild(curtain);
+ const navMask=document.createElement('div');
+ navMask.className='raze-cards-nav-mask';
+ navMask.setAttribute('aria-hidden','true');
+ scene.appendChild(navMask);
  function positionCurtain(){
    const vw=art.clientWidth,vh=art.clientHeight,ox=art.offsetLeft,oy=art.offsetTop;
    curtain.style.left=(ox+.372*vw)+'px';curtain.style.top=(oy+.307*vh)+'px';
    curtain.style.width=(.255*vw)+'px';curtain.style.height=(.468*vh)+'px';
+   navMask.style.left=(ox+.401*vw)+'px';navMask.style.top=(oy+.007*vh)+'px';
+   navMask.style.width=(.070*vw)+'px';navMask.style.height=(.078*vh)+'px';
  }
  window.addEventListener('resize',positionCurtain);
  art.addEventListener('load',positionCurtain);
