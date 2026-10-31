@@ -8,6 +8,7 @@
 
 /* Masquage de l'onglet Raze Cards dans la barre supérieure */
 .raze-cards-nav-mask{position:absolute;z-index:4;background:#080808;pointer-events:auto}
+.raze-cards-nav-mask{display:flex;align-items:flex-end;justify-content:center;padding-bottom:5%;overflow:hidden}.raze-cards-nav-mask__text{font:700 clamp(7px,.76vw,15px) Arial,sans-serif;color:#f2f2f2;white-space:nowrap;letter-spacing:.015em;text-align:center;user-select:none;pointer-events:none;text-shadow:0 1px 4px #000}
 /* Texte de teasing au-dessus du rideau, sans modifier l'animation */
 .raze-curtain__label{position:absolute;z-index:3;left:5%;right:5%;top:49%;transform:translateY(-50%);padding:.6em .2em;text-align:center;font-family:Arial,sans-serif;font-weight:900;font-size:clamp(10px,1.55vw,30px);letter-spacing:.08em;text-transform:uppercase;color:#f7f2ef;text-shadow:0 3px 7px #000,0 0 14px #000,0 0 22px #e51d32;pointer-events:none;white-space:nowrap}
 </style></head><body><main class="scene" id="scene" aria-label="Accueil RAZE ESPORT"><img id="art" width="1672" height="941" src="assets/accueil-raze-esport.png" alt="Accueil RAZE ESPORT, trois univers Championship, Cards et Private Match"></main><section class="screen" id="screen" role="dialog" aria-modal="true" aria-label="Espace interactif"><div class="panel"><div class="top"><h1 id="heading"></h1><button class="close" onclick="hide()">✕ Retour à l'accueil</button></div><div id="content"></div></div></section><script>
@@ -42,7 +43,8 @@ function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;',
  scene.appendChild(curtain);
  const navMask=document.createElement('div');
  navMask.className='raze-cards-nav-mask';
- navMask.setAttribute('aria-hidden','true');
+ navMask.setAttribute('aria-label','Projet en cours — bientôt disponible');
+ navMask.innerHTML='<span class="raze-cards-nav-mask__text">PROJET EN COURS</span>';
  scene.appendChild(navMask);
  function positionCurtain(){
    const vw=art.clientWidth,vh=art.clientHeight,ox=art.offsetLeft,oy=art.offsetTop;
