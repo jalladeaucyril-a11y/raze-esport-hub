@@ -14,6 +14,9 @@
 /* Texte clairement visible entre les deux onglets */
 .raze-cards-nav-mask{display:flex!important;align-items:center!important;justify-content:center!important;padding:0!important;background:#050505!important;z-index:8!important;pointer-events:none!important}
 .raze-cards-nav-mask__text{display:block!important;color:#f4f4f4!important;font-family:Arial,sans-serif!important;font-weight:700!important;font-size:clamp(8px,1.05vw,17px)!important;line-height:1.15!important;letter-spacing:0!important;text-align:center!important;white-space:normal!important;text-shadow:0 1px 4px #000!important}
+
+/* Connexion Discord : ajout limité à l'espace Profil */
+.discord-login{background:#5865f2;border-color:#8790ff;font-weight:bold}.discord-login:hover{background:#4752c4}.discord-profile{display:flex;align-items:center;gap:18px;flex-wrap:wrap}.discord-avatar{width:76px;height:76px;border-radius:50%;border:2px solid #a88440;object-fit:cover}.discord-status{color:#75e6a0}.discord-error{color:#ff8893}.discord-help{font-size:13px;color:#aaa}
 </style></head><body><main class="scene" id="scene" aria-label="Accueil RAZE ESPORT"><img id="art" width="1672" height="941" src="assets/accueil-raze-esport.png" alt="Accueil RAZE ESPORT, trois univers Championship, Cards et Private Match"></main><section class="screen" id="screen" role="dialog" aria-modal="true" aria-label="Espace interactif"><div class="panel"><div class="top"><h1 id="heading"></h1><button class="close" onclick="hide()">✕ Retour à l'accueil</button></div><div id="content"></div></div></section><script>
 const scene=document.getElementById('scene'),art=document.getElementById('art'),screen=document.getElementById('screen'),heading=document.getElementById('heading'),content=document.getElementById('content');
 // Coordinates expressed as fractions of the exact supplied artwork, not guessed from a replacement layout.
@@ -29,11 +32,11 @@ if(current==='cards')html=`<p class="muted">Booster et collection de démonstrat
 if(current==='match')html=`<p class="muted">Files fictives : le véritable bot 6Mans n'est pas connecté.</p><div class="grid"><div class="tile"><h3>🎮 File 2v2</h3><p id="queue2">Aucune file rejointe</p><button class="btn" onclick="toggleQueue(2)">Rejoindre / quitter</button></div><div class="tile"><h3>🎮 File 3v3</h3><p id="queue3">Aucune file rejointe</p><button class="btn" onclick="toggleQueue(3)">Rejoindre / quitter</button></div><div class="tile"><h3>📊 Mon MMR (démo)</h3><p>${mmr} MMR</p><button class="btn" onclick="simulateMatch()">Simuler un résultat</button></div></div><div class="tile"><h3>Classement fictif</h3>1. Raze_Player — 1300 MMR<br>2. Monster — 1220 MMR<br>3. Santaury — 1160 MMR</div>`;
 if(current==='community')html=`<div class="grid"><div class="tile"><h3>👥 Communauté RAZE</h3><p>Retrouve les joueurs, les événements et les actualités.</p></div><div class="tile"><h3>💡 Avis & Idées</h3><p>Propose des améliorations et vote.</p><button class="btn" onclick="show('ideas')">Accéder aux idées</button></div></div>`;
 if(current==='ideas')html=`<div class="notice">Les idées et les votes sont stockés uniquement dans ce navigateur pour cet aperçu.</div><label>Projet concerné</label><select class="field" id="project"><option>RAZE ESPORT HUB</option><option>RAZE CHAMPIONSHIP</option><option>RAZE CARDS</option><option>PRIVATE MATCH</option></select><label>Titre</label><input class="field" id="ideaTitle" maxlength="90" placeholder="Ex. : Ajouter un calendrier"><label>Proposition</label><textarea class="field" id="ideaText" placeholder="Décris ton idée..."></textarea><div class="row"><button class="btn" onclick="addIdea()">Publier une idée (démo)</button></div><h2>Propositions</h2><div id="ideasList">${votes.length?votes.map((v,i)=>`<div class="idea"><span class="pill">${esc(v.project)}</span><h3>${esc(v.title)}</h3><p>${esc(v.text)}</p><button class="btn" onclick="upvote(${i})">▲ ${v.votes} vote(s)</button></div>`).join(''):'Aucune idée pour le moment.'}</div>`;
-if(current==='profile')html=`<div class="tile"><h3>👤 Profil de démonstration</h3><label>Pseudo</label><input class="field" id="nickname" maxlength="30" value="${esc(player)}"><div class="row"><button class="btn" onclick="player=document.getElementById('nickname').value.trim()||'Raze_Player';save();render()">Enregistrer</button></div><p class="muted">Aucun compte réel n'est créé.</p></div>`;
+if(current==='profile')html=renderDiscordProfile();
 if(current==='shop')html=`<div class="tile"><h3>🛍️ Boutique RAZE</h3><p>Section de présentation, aucun achat possible pour le moment.</p></div>`;
 if(current==='notifications')html=`<div class="tile"><h3>🔔 Notifications</h3><p>Bienvenue sur l'aperçu de RAZE ESPORT HUB.</p><p class="muted">Aucune notification réelle.</p></div>`;
 if(current==='search')html=`<label>Rechercher un univers</label><input class="field" id="searchInput" placeholder="championship, cards, match, avis..." oninput="findPage(this.value)"><div id="searchResults" class="row"></div>`;
-content.innerHTML=html+'<div class="notice small">APERÇU INTERACTIF — données fictives, sauvegardées localement sur cet appareil. Aucun lien avec tes sites existants.</div>'}
+content.innerHTML=html+'<div class="notice small">Les autres sections du Hub restent des démonstrations. La connexion Discord utilise Supabase lorsqu’elle est lancée depuis le site hébergé.</div>'}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}function openPack(){if(!packs){alert('Réserve de démonstration épuisée');return}packs--;let rar=['Commun','Peu commun','Rare','Super rare','Ultra rare','Légendaire','Divin'];let got=Array.from({length:5},(_,i)=>({name:'Carte RAZE #'+(collection.length+i+1),rare:rar[Math.floor(Math.random()*rar.length)]}));collection.push(...got);save();render();document.getElementById('cardsResult').innerHTML='<div class="grid">'+got.map(c=>`<div class="tile"><h3>${esc(c.name)}</h3><p>${esc(c.rare)}</p></div>`).join('')+'</div>'}function showCollection(){document.getElementById('cardsResult').innerHTML='<div class="grid">'+(collection.map(c=>`<div class="tile"><h3>${esc(c.name)}</h3>${esc(c.rare)}</div>`).join('')||'<p>Collection vide.</p>')+'</div>'}function showVitrine(){document.getElementById('cardsResult').innerHTML='<div class="tile"><h3>✨ Ma vitrine</h3><p>'+collection.slice(-5).map(c=>esc(c.name)).join(' • ')+'</p><button class="btn" onclick="this.parentElement.style.boxShadow=this.parentElement.style.boxShadow?\'\':\'0 0 40px #e6b74a\'">Allumer / éteindre</button></div>'}let queues={2:false,3:false};function toggleQueue(n){queues[n]=!queues[n];document.getElementById('queue'+n).textContent=queues[n]?'Dans la file '+n+'v'+n+' (démo)':'Aucune file rejointe'}function simulateMatch(){mmr+=Math.random()>.5?12:-9;save();render()}function addIdea(){let title=document.getElementById('ideaTitle').value.trim(),desc=document.getElementById('ideaText').value.trim();if(!title||!desc){alert('Ajoute un titre et une description.');return}votes.unshift({project:document.getElementById('project').value,title,text:desc,votes:0});save();render()}function upvote(i){votes[i].votes++;save();render()}function findPage(q){let arr=[['champ','RAZE CHAMPIONSHIP'],['cards','RAZE CARDS'],['match','PRIVATE MATCH'],['community','COMMUNAUTÉ'],['ideas','AVIS & IDÉES']];document.getElementById('searchResults').innerHTML=arr.filter(a=>a[1].toLowerCase().includes(q.toLowerCase())).map(a=>`<button class="btn" onclick="show('${a[0]}')">${a[1]}</button>`).join('')}
 
 // Rideau aligné exactement sur la zone centrale Raze Cards de l'illustration.
@@ -60,4 +63,31 @@ function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;',
  art.addEventListener('load',positionCurtain);
  positionCurtain();
 })();
-</script></body></html>
+
+// Authentification réelle Supabase / Discord (aucun Client Secret dans le navigateur).
+const RAZE_SUPABASE_URL='https://wyjeusqhnhqmpdwanuxp.supabase.co';
+const RAZE_SUPABASE_PUBLISHABLE_KEY='sb_publishable_ZZzWmgueTe3quSe3-e-1Pw_vRj-uuJW';
+let razeAuth=null,razeUser=null,razeAuthError='',razeAuthLoading=true;
+function renderDiscordProfile(){
+ if(razeAuthLoading)return '<div class="tile">Chargement de la connexion Discord…</div>';
+ if(razeAuthError)return `<div class="tile"><h3>Connexion Discord</h3><p class="discord-error">${esc(razeAuthError)}</p><button class="btn" onclick="initRazeAuth()">Réessayer</button></div>`;
+ if(!razeUser)return '<div class="tile"><h3>Connexion au compte Raze Esport</h3><p>Un seul compte Discord pour Championship, Cards et Private Match.</p><button class="btn discord-login" onclick="loginRazeDiscord()">Se connecter avec Discord</button><p class="discord-help">Tu seras redirigé vers Discord pour autoriser la connexion.</p></div>';
+ const m=razeUser.user_metadata||{};const name=m.full_name||m.name||m.custom_claims?.global_name||m.preferred_username||m.user_name||'Membre Discord';
+ const avatar=(typeof m.avatar_url==='string'&&/^https:\/\//.test(m.avatar_url))?m.avatar_url:'';
+ return `<div class="tile"><h3 class="discord-status">● Connecté avec Discord</h3><div class="discord-profile">${avatar?`<img class="discord-avatar" src="${esc(avatar)}" alt="Avatar Discord" referrerpolicy="no-referrer">`:''}<div><h2>${esc(name)}</h2><p class="muted">Compte Raze Esport Hub</p></div></div><div class="row"><button class="btn" onclick="logoutRazeDiscord()">Se déconnecter</button></div></div>`;
+}
+async function initRazeAuth(){
+ razeAuthLoading=true;razeAuthError='';if(current==='profile')render();
+ try{
+  if(!window.supabase?.createClient)throw new Error('Bibliothèque Supabase indisponible. Vérifie ta connexion Internet.');
+  if(!razeAuth){razeAuth=window.supabase.createClient(RAZE_SUPABASE_URL,RAZE_SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});razeAuth.auth.onAuthStateChange((_event,session)=>{razeUser=session?.user||null;if(current==='profile')setTimeout(render,0);});}
+  const {data,error}=await razeAuth.auth.getSession();if(error)throw error;razeUser=data.session?.user||null;
+ }catch(e){razeAuthError=e.message||'Impossible de charger la connexion.';}finally{razeAuthLoading=false;if(current==='profile')render();}
+}
+async function loginRazeDiscord(){
+ if(!razeAuth){await initRazeAuth();if(!razeAuth)return;}
+ try{const {error}=await razeAuth.auth.signInWithOAuth({provider:'discord',options:{redirectTo:'https://raze-esport-hub.vercel.app/',scopes:'identify email'}});if(error)throw error;}catch(e){razeAuthError=e.message||'Échec de la connexion.';render();}
+}
+async function logoutRazeDiscord(){if(!razeAuth)return;const {error}=await razeAuth.auth.signOut();if(error){razeAuthError=error.message;}else{razeUser=null;razeAuthError='';}render();}
+window.addEventListener('load',initRazeAuth);
+</script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script></body></html>
