@@ -20,11 +20,11 @@
 .discord-login{background:#5865f2;border-color:#8790ff;font-weight:bold}.discord-login:hover{background:#4752c4}.discord-profile{display:flex;align-items:center;gap:18px;flex-wrap:wrap}.discord-avatar{width:76px;height:76px;border-radius:50%;border:2px solid #a88440;object-fit:cover}.discord-status{color:#75e6a0}.discord-error{color:#ff8893}.discord-help{font-size:13px;color:#aaa}
 
 /* Profil Discord dans l'en-tête : habillage fidèle noir et doré. */
-.raze-header-profile{position:absolute;z-index:12;display:flex;align-items:center;gap:5%;padding:0 5%;border:1px solid #9c792c;border-radius:12px;background:linear-gradient(115deg,#030303 0%,#12100c 62%,#050505 100%);box-shadow:inset 0 0 0 1px #4d4025,0 0 9px #000;pointer-events:none;overflow:hidden;color:#f5f5f5}
-.scene .raze-header-profile .raze-header-profile__avatar{width:auto;height:48%;max-width:none;aspect-ratio:1;border-radius:50%;object-fit:cover;border:2px solid #b78c27;background:#0b0b0b;flex-shrink:0}
+.raze-header-profile{position:absolute;z-index:12;display:flex;align-items:center;gap:0;padding:0;border:1px solid #9c792c;border-radius:12px;background:linear-gradient(115deg,#030303 0%,#12100c 62%,#050505 100%);box-shadow:inset 0 0 0 1px #4d4025,0 0 9px #000;pointer-events:none;overflow:hidden;color:#f5f5f5}
+.scene .raze-header-profile .raze-header-profile__avatar{position:absolute;left:5%;top:25%;width:auto;height:50%;max-width:none;aspect-ratio:1;border-radius:50%;object-fit:cover;border:2px solid #b78c27;background:#0b0b0b;flex-shrink:0}
 .raze-header-profile__default{display:grid;place-items:center;font-weight:900;color:#f7c85d;font-style:italic;font-size:clamp(10px,1.4vw,27px)}
-.raze-header-profile__name{display:block;min-width:0;flex:1 1 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700;font-size:clamp(8px,1.02vw,19px);text-shadow:0 1px 3px #000}
-.raze-header-profile__arrow{width:8px;height:8px;border-right:2px solid #eee;border-bottom:2px solid #eee;transform:rotate(45deg) translateY(-2px);flex-shrink:0;margin-right:3%}
+.raze-header-profile__name{position:absolute;display:block;left:25%;right:13%;top:50%;transform:translateY(-50%);overflow:visible;white-space:nowrap;font-weight:700;font-size:clamp(8px,.95vw,17px);text-shadow:0 1px 3px #000}
+.raze-header-profile__arrow{position:absolute;right:6%;top:45%;width:8px;height:8px;border-right:2px solid #eee;border-bottom:2px solid #eee;transform:rotate(45deg);flex-shrink:0}
 </style></head><body><main class="scene" id="scene" aria-label="Accueil RAZE ESPORT"><img id="art" width="1672" height="941" src="assets/accueil-raze-esport.png" alt="Accueil RAZE ESPORT, trois univers Championship, Cards et Private Match"></main><section class="screen" id="screen" role="dialog" aria-modal="true" aria-label="Espace interactif"><div class="panel"><div class="top"><h1 id="heading"></h1><button class="close" onclick="hide()">✕ Retour à l'accueil</button></div><div id="content"></div></div></section><script>
 const scene=document.getElementById('scene'),art=document.getElementById('art'),screen=document.getElementById('screen'),heading=document.getElementById('heading'),content=document.getElementById('content');
 // Coordinates expressed as fractions of the exact supplied artwork, not guessed from a replacement layout.
@@ -125,10 +125,13 @@ function updateRazeHeaderProfile(){
  const identity=razeUser?razeDiscordIdentity():{name:'Se connecter',avatar:''};
  const fallback='<span class="raze-header-profile__avatar raze-header-profile__default">R</span>';
  razeHeaderProfile.innerHTML=(identity.avatar?`<img class="raze-header-profile__avatar" src="${esc(identity.avatar)}" alt="" referrerpolicy="no-referrer">`:fallback)+`<span class="raze-header-profile__name">${esc(identity.name)}</span><span class="raze-header-profile__arrow"></span>`;
+ const label=razeHeaderProfile.querySelector('.raze-header-profile__name');
+ // Réduit uniquement la police si nécessaire, pour afficher le pseudo complet.
+ if(label){const fit=()=>{const available=label.clientWidth;let size=Math.min(17,Math.max(9,window.innerWidth*.0095));label.style.fontSize=size+'px';while(size>7 && label.scrollWidth>available){size-=.5;label.style.fontSize=size+'px';}};requestAnimationFrame(fit);}
  const img=razeHeaderProfile.querySelector('img');
  if(img)img.onerror=()=>img.replaceWith(Object.assign(document.createElement('span'),{className:'raze-header-profile__avatar raze-header-profile__default',textContent:'R'}));
 }
-window.addEventListener('resize',positionRazeHeaderProfile);
+window.addEventListener('resize',()=>{positionRazeHeaderProfile();updateRazeHeaderProfile();});
 art.addEventListener('load',positionRazeHeaderProfile);
 positionRazeHeaderProfile();updateRazeHeaderProfile();
 
