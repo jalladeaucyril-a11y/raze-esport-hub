@@ -18,6 +18,13 @@
 
 /* Connexion Discord : ajout limité à l'espace Profil */
 .discord-login{background:#5865f2;border-color:#8790ff;font-weight:bold}.discord-login:hover{background:#4752c4}.discord-profile{display:flex;align-items:center;gap:18px;flex-wrap:wrap}.discord-avatar{width:76px;height:76px;border-radius:50%;border:2px solid #a88440;object-fit:cover}.discord-status{color:#75e6a0}.discord-error{color:#ff8893}.discord-help{font-size:13px;color:#aaa}
+
+/* Profil Discord dans l'en-tête : habillage fidèle noir et doré. */
+.raze-header-profile{position:absolute;z-index:12;display:flex;align-items:center;gap:4%;padding:0 5%;border:1px solid #9c792c;border-radius:12px;background:linear-gradient(115deg,#030303 0%,#12100c 62%,#050505 100%);box-shadow:inset 0 0 0 1px #4d4025,0 0 9px #000;pointer-events:none;overflow:hidden;color:#f5f5f5}
+.raze-header-profile__avatar{height:75%;aspect-ratio:1;border-radius:50%;object-fit:cover;border:2px solid #b78c27;background:#0b0b0b;flex-shrink:0}
+.raze-header-profile__default{display:grid;place-items:center;font-weight:900;color:#f7c85d;font-style:italic;font-size:clamp(10px,1.4vw,27px)}
+.raze-header-profile__name{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700;font-size:clamp(8px,1.02vw,19px);text-shadow:0 1px 3px #000}
+.raze-header-profile__arrow{width:8px;height:8px;border-right:2px solid #eee;border-bottom:2px solid #eee;transform:rotate(45deg) translateY(-2px);flex-shrink:0;margin-right:3%}
 </style></head><body><main class="scene" id="scene" aria-label="Accueil RAZE ESPORT"><img id="art" width="1672" height="941" src="assets/accueil-raze-esport.png" alt="Accueil RAZE ESPORT, trois univers Championship, Cards et Private Match"></main><section class="screen" id="screen" role="dialog" aria-modal="true" aria-label="Espace interactif"><div class="panel"><div class="top"><h1 id="heading"></h1><button class="close" onclick="hide()">✕ Retour à l'accueil</button></div><div id="content"></div></div></section><script>
 const scene=document.getElementById('scene'),art=document.getElementById('art'),screen=document.getElementById('screen'),heading=document.getElementById('heading'),content=document.getElementById('content');
 // Coordinates expressed as fractions of the exact supplied artwork, not guessed from a replacement layout.
@@ -92,14 +99,38 @@ async function initRazeAuth(){
  razeAuthLoading=true;razeAuthError='';if(current==='profile')render();
  try{
   if(!window.supabase?.createClient)throw new Error('Bibliothèque Supabase indisponible. Vérifie ta connexion Internet.');
-  if(!razeAuth){razeAuth=window.supabase.createClient(RAZE_SUPABASE_URL,RAZE_SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});razeAuth.auth.onAuthStateChange((_event,session)=>{razeUser=session?.user||null;if(current==='profile')setTimeout(render,0);});}
-  const {data,error}=await razeAuth.auth.getSession();if(error)throw error;razeUser=data.session?.user||null;
+  if(!razeAuth){razeAuth=window.supabase.createClient(RAZE_SUPABASE_URL,RAZE_SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});razeAuth.auth.onAuthStateChange((_event,session)=>{razeUser=session?.user||null;updateRazeHeaderProfile();if(current==='profile')setTimeout(render,0);});}
+  const {data,error}=await razeAuth.auth.getSession();if(error)throw error;razeUser=data.session?.user||null;updateRazeHeaderProfile();
  }catch(e){razeAuthError=e.message||'Impossible de charger la connexion.';}finally{razeAuthLoading=false;if(current==='profile')render();}
 }
 async function loginRazeDiscord(){
  if(!razeAuth){await initRazeAuth();if(!razeAuth)return;}
  try{const {error}=await razeAuth.auth.signInWithOAuth({provider:'discord',options:{redirectTo:'https://raze-esport-hub.vercel.app/',scopes:'identify email'}});if(error)throw error;}catch(e){razeAuthError=e.message||'Échec de la connexion.';render();}
 }
-async function logoutRazeDiscord(){if(!razeAuth)return;const {error}=await razeAuth.auth.signOut();if(error){razeAuthError=error.message;}else{razeUser=null;razeAuthError='';}render();}
+async function logoutRazeDiscord(){if(!razeAuth)return;const {error}=await razeAuth.auth.signOut();if(error){razeAuthError=error.message;}else{razeUser=null;razeAuthError='';updateRazeHeaderProfile();}render();}
+
+// Recouvre uniquement le profil figé dans l'image de fond ; le bouton Profil d'origine reste cliquable.
+const razeHeaderProfile=document.createElement('div');
+razeHeaderProfile.className='raze-header-profile';
+razeHeaderProfile.setAttribute('aria-hidden','true');
+scene.appendChild(razeHeaderProfile);
+function positionRazeHeaderProfile(){
+ const w=art.clientWidth,h=art.clientHeight,x=art.offsetLeft,y=art.offsetTop;
+ razeHeaderProfile.style.left=(x+.783*w)+'px';
+ razeHeaderProfile.style.top=(y+.008*h)+'px';
+ razeHeaderProfile.style.width=(.141*w)+'px';
+ razeHeaderProfile.style.height=(.075*h)+'px';
+}
+function updateRazeHeaderProfile(){
+ const identity=razeUser?razeDiscordIdentity():{name:'Se connecter',avatar:''};
+ const fallback='<span class="raze-header-profile__avatar raze-header-profile__default">R</span>';
+ razeHeaderProfile.innerHTML=(identity.avatar?`<img class="raze-header-profile__avatar" src="${esc(identity.avatar)}" alt="" referrerpolicy="no-referrer">`:fallback)+`<span class="raze-header-profile__name">${esc(identity.name)}</span><span class="raze-header-profile__arrow"></span>`;
+ const img=razeHeaderProfile.querySelector('img');
+ if(img)img.onerror=()=>img.replaceWith(Object.assign(document.createElement('span'),{className:'raze-header-profile__avatar raze-header-profile__default',textContent:'R'}));
+}
+window.addEventListener('resize',positionRazeHeaderProfile);
+art.addEventListener('load',positionRazeHeaderProfile);
+positionRazeHeaderProfile();updateRazeHeaderProfile();
+
 window.addEventListener('load',initRazeAuth);
 </script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script></body></html>
